@@ -11,15 +11,23 @@ env = environ.Env(
     DJANGO_DEBUG=(bool, False),
     DJANGO_SECRET_KEY=(str, 'change-me'),
     ALLOWED_HOSTS=(list, ['*']),
-    DB_NAME=(str, 'accounts_db'),
-    DB_USER=(str, 'accounts_user'),
-    DB_PASSWORD=(str, 'accounts_pass'),
-    DB_HOST=(str, 'accounts-db'),
+    # Variables Railway MySQL
+    MYSQLDATABASE=(str, 'railway'),
+    MYSQLUSER=(str, 'root'),
+    MYSQLPASSWORD=(str, ''),
+    MYSQLHOST=(str, 'localhost'),
+    MYSQLPORT=(int, 3306),
+    # Variables legacy
+    DB_NAME=(str, ''),
+    DB_USER=(str, ''),
+    DB_PASSWORD=(str, ''),
+    DB_HOST=(str, ''),
     DB_PORT=(int, 3306),
     TIME_ZONE=(str, 'America/Bogota'),
     CORS_ALLOWED_ORIGINS=(list, ['http://localhost:3000', 'http://localhost:8080', 'http://localhost:3001']),
     JWT_SECRET=(str, 'change-jwt-secret'),
     DATABASE_URL=(str, ''),
+    MYSQL_URL=(str, ''),
 )
 
 env_file = os.path.join(BASE_DIR, '.env')
@@ -77,28 +85,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'accounts_service.wsgi.application'
 ASGI_APPLICATION = 'accounts_service.asgi.application'
 
-DATABASE_URL = env('DATABASE_URL')
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('MYSQLDATABASE', 'railway'),
+        'USER': os.environ.get('MYSQLUSER', 'root'),
+        'PASSWORD': os.environ.get('MYSQLPASSWORD', ''),
+        'HOST': os.environ.get('MYSQLHOST', 'localhost'),
+        'PORT': os.environ.get('MYSQLPORT', '3306'),
+        'OPTIONS': {'charset': 'utf8mb4'},
     }
-    DATABASES['default']['OPTIONS'] = {'charset': 'utf8mb4'}
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': env('DB_NAME'),
-            'USER': env('DB_USER'),
-            'PASSWORD': env('DB_PASSWORD'),
-            'HOST': env('DB_HOST'),
-            'PORT': env('DB_PORT'),
-            'OPTIONS': {'charset': 'utf8mb4'},
-        }
-    }
+}
 
 AUTH_USER_MODEL = 'accounts.User'
 

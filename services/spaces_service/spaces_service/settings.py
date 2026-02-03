@@ -76,28 +76,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'spaces_service.wsgi.application'
 ASGI_APPLICATION = 'spaces_service.asgi.application'
 
-DATABASE_URL = env('DATABASE_URL')
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('MYSQLDATABASE', 'railway'),
+        'USER': os.environ.get('MYSQLUSER', 'root'),
+        'PASSWORD': os.environ.get('MYSQLPASSWORD', ''),
+        'HOST': os.environ.get('MYSQLHOST', 'localhost'),
+        'PORT': os.environ.get('MYSQLPORT', '3306'),
+        'OPTIONS': {'charset': 'utf8mb4'},
     }
-    DATABASES['default']['OPTIONS'] = {'charset': 'utf8mb4'}
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': env('DB_NAME'),
-            'USER': env('DB_USER'),
-            'PASSWORD': env('DB_PASSWORD'),
-            'HOST': env('DB_HOST'),
-            'PORT': env('DB_PORT'),
-            'OPTIONS': {'charset': 'utf8mb4'},
-        }
-    }
+}
 
 LANGUAGE_CODE = 'es-co'
 TIME_ZONE = env('TIME_ZONE')

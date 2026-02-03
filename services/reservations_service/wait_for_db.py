@@ -6,11 +6,11 @@ import pymysql
 
 
 def wait_for_db() -> None:
-    host = os.environ.get("DB_HOST", "localhost")
-    user = os.environ.get("DB_USER")
-    password = os.environ.get("DB_PASSWORD")
-    db = os.environ.get("DB_NAME")
-    port = int(os.environ.get("DB_PORT", 3306))
+    host = os.environ.get("MYSQLHOST", "localhost")
+    user = os.environ.get("MYSQLUSER", "root")
+    password = os.environ.get("MYSQLPASSWORD", "")
+    db = os.environ.get("MYSQLDATABASE", "railway")
+    port = int(os.environ.get("MYSQLPORT", 3306))
 
     for attempt in range(30):
         try:
