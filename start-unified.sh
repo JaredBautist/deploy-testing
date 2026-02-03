@@ -9,6 +9,14 @@ echo "=========================================="
 export RESERVATIONS_BASE_URL="http://127.0.0.1:8003/api"
 export SPACES_BASE_URL="http://127.0.0.1:8002/api"
 
+# Puerto de Railway (default 80)
+PORT=${PORT:-80}
+echo "Using PORT: $PORT"
+
+# Reemplazar puerto en nginx config
+sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/conf.d/default.conf
+sed -i "s/listen 8080;/listen $PORT;/g" /etc/nginx/conf.d/default.conf
+
 echo "Step 1: Waiting for database..."
 cd /app/accounts
 python wait_for_db.py
