@@ -1,0 +1,56 @@
+# Dockerfile Unificado - Un solo contenedor con todos los servicios
+# Usa Supervisor para ejecutar múltiples procesos
+
+# ============== STAGE 1: Build Frontend ==============
+FROM node:20-alpine AS frontend-build
+WORKDIR /app/frontend
+
+COPY frontend/package*.json ./
+RUN npm ci
+
+COPY frontend/ ./
+RUN npm run build
+
+# ============== STAGE 2: Final Image ==============
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    nginx \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear directorios
+RUN mkdir -p /app/accounts /app/spaces /app/reservations /var/log/supervisor
+
+WORKDIR /app
+
+# Instalar dependencias Python
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar servicios backend
+COPY services/accounts_service /app/accounts
+COPY services/spaces_service /app/spaces
+COPY services/reservations_service /app/reservations
+
+# Copiar frontend construido
+COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
+
+# Copiar configuraciones
+COPY nginx.unified.conf /etc/nginx/sites-available/default
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY start-unified.sh /app/start.sh
+
+# Eliminar configuración nginx por defecto y enlazar la nuestra
+RUN rm -f /etc/nginx/sites-enabled/default && \
+    ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+RUN chmod +x /app/start.sh
+
+EXPOSE 80
+
+CMD ["/app/start.sh"]
