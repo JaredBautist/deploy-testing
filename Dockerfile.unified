@@ -16,6 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     supervisor \
     dos2unix \
+    gettext-base \
+    default-libmysqlclient-dev \
+    pkg-config \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app/accounts /app/spaces /app/reservations /var/log/supervisor

@@ -1,4 +1,4 @@
-﻿from datetime import timedelta
+from datetime import timedelta
 
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -8,8 +8,9 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from reservations.models import Reservation
 from reservations.permissions import IsAdminRole, IsOwnerOrAdmin
@@ -29,6 +30,13 @@ from reservations.services import (
     update_reservation,
 )
 from reservations.reporting import build_reservations_report
+
+
+class HealthCheckView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response({'status': 'ok', 'service': 'reservations'})
 
 DATE_RANGE_PARAMS = [
     OpenApiParameter(

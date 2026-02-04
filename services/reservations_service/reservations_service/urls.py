@@ -3,13 +3,14 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework import routers
 
-from reservations.views import ReservationViewSet
+from reservations.views import ReservationViewSet, HealthCheckView
 
 router = routers.DefaultRouter()
 router.register(r"reservations", ReservationViewSet, basename="reservation")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/reservations/health/', HealthCheckView.as_view(), name='health_check'),
     path('api/', include(router.urls)),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger'),

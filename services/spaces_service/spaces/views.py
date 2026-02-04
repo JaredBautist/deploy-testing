@@ -1,4 +1,4 @@
-﻿from datetime import timedelta
+from datetime import timedelta
 
 import requests
 from django.conf import settings
@@ -7,13 +7,21 @@ from django.utils.dateparse import parse_datetime
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticated, SAFE_METHODS
+from rest_framework.permissions import IsAuthenticated, AllowAny, SAFE_METHODS
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from spaces.models import Space
 from spaces.permissions import IsAdminRole
 from spaces.serializers import SpaceAvailabilitySerializer, SpaceSerializer
+
+
+class HealthCheckView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response({'status': 'ok', 'service': 'spaces'})
 
 
 def _parse_datetime(value):

@@ -1,7 +1,7 @@
-﻿from django.contrib.auth import get_user_model
+﻿from django.contrib.auth import get_user_model, authenticate
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import status, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
@@ -11,6 +11,49 @@ from accounts.permissions import IsAdminRole
 from accounts.serializers import UserSerializer
 
 User = get_user_model()
+
+
+class HealthCheckView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        return Response({'status': 'ok', 'service': 'accounts'})
+
+
+class TestLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        # Mostrar info de debug
+        users = User.objects.all()
+        return Response({
+            'status': 'ok',
+            'total_users': users.count(),
+            'users': [{'email': u.email, 'is_active': u.is_active, 'role': u.role} for u in users]
+        })
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Verificar si el usuario existe
+        try:
+            user = User.objects.get(email=email)
+            user_exists = True
+            is_active = user.is_active
+            password_valid = user.check_password(password)
+        except User.DoesNotExist:
+            user_exists = False
+            is_active = False
+            password_valid = False
+
+        return Response({
+            'email_received': email,
+            'password_received': bool(password),
+            'user_exists': user_exists,
+            'is_active': is_active,
+            'password_valid': password_valid,
+        })
 
 
 class AccountTokenObtainPairSerializer(TokenObtainPairSerializer):

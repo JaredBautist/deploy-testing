@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:deploy-testing-production.up.railway.app)"
+    ]
+  }
+}
