@@ -18,18 +18,22 @@ ADMIN_FIRST_NAME = os.getenv('ADMIN_FIRST_NAME', 'Admin')
 ADMIN_LAST_NAME = os.getenv('ADMIN_LAST_NAME', 'Sistema')
 
 if ADMIN_EMAIL and ADMIN_PASSWORD:
-    if not User.objects.filter(email=ADMIN_EMAIL).exists():
-        user = User.objects.create_user(
-            email=ADMIN_EMAIL,
-            password=ADMIN_PASSWORD,
-            first_name=ADMIN_FIRST_NAME,
-            last_name=ADMIN_LAST_NAME,
-            role='ADMIN'
-        )
-        user.is_superuser = True
-        user.save()
+    user, created = User.objects.get_or_create(
+        email=ADMIN_EMAIL,
+        defaults={
+            'first_name': ADMIN_FIRST_NAME,
+            'last_name': ADMIN_LAST_NAME,
+            'role': 'ADMIN',
+            'is_superuser': True,
+        }
+    )
+    # Siempre actualizar la contraseña para asegurar que coincida
+    user.set_password(ADMIN_PASSWORD)
+    user.is_active = True
+    user.save()
+    if created:
         print(f"Usuario administrador creado: {ADMIN_EMAIL}")
     else:
-        print(f"Usuario administrador ya existe: {ADMIN_EMAIL}")
+        print(f"Usuario administrador actualizado: {ADMIN_EMAIL}")
 else:
     print("Variables ADMIN_EMAIL y ADMIN_PASSWORD no configuradas, saltando creación de admin.")
